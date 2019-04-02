@@ -1,0 +1,26 @@
+<div class="container">
+  <div class="form-row">
+    <div class="col-10">
+      <input type="text" name="description" class="form-control" placeholder="Description"
+        value="{{task.description}}">
+    </div>
+    <div class="col">
+      <input type="text" name="priority" class="form-control" placeholder="Priority"
+        value="{{task.priority}}">
+    </div>
+  </div>
+  <div class="form-group row mt-2">
+      <label for="dueDate" class="col-2 col-form-label">Due Date</label>
+      <div class="col">
+        <input type="datetime-local" name="dueDate" id="dueDate" class="form-control" value="{{formatDate task.dueDate 'YYYY-MM-DDTHH:mm:ss'}}">
+      </div>
+  </div>
+  <div class="form-row">
+    <div class="col">
+      <input type="text" name="tagList" class="form-control" placeholder="Tags" value="{{task.tagList}}">
+    </div>
+  </div>
+</div>
+<hr>
+
+<button type="submit" id="taskSubmit" class="btn btn-primary btn-block">Submit</button>

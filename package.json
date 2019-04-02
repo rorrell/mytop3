@@ -1,0 +1,40 @@
+{
+  "name": "mytop3",
+  "version": "1.0.0",
+  "description": "To do list focusing on the next 3 items you need to do",
+  "main": "app.js",
+  "scripts": {
+    "test": "mocha ./test --recursive",
+    "start": "node app.js",
+    "scss": "node-sass src/scss -o public/css",
+    "scss:watch": "node-sass --watch src/scss -o public/css"
+  },
+  "author": "Rachel Orrell",
+  "license": "MIT",
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.7.2",
+    "body-parser": "^1.18.3",
+    "bootstrap": "^4.3.1",
+    "connect-flash": "^0.1.1",
+    "connect-mongo": "^2.0.3",
+    "express": "^4.16.4",
+    "express-handlebars": "^3.0.2",
+    "express-session": "^1.15.6",
+    "jquery": "^3.3.1",
+    "jquery-validation": "^1.19.0",
+    "method-override": "^3.0.0",
+    "moment": "^2.24.0",
+    "mongoose": "^5.4.21",
+    "node-sass": "^4.11.0",
+    "popper.js": "^1.14.7"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-datetime": "^1.5.0",
+    "chai-sorted": "^0.2.0",
+    "mocha": "^6.0.2",
+    "mockgoose": "^8.0.1",
+    "nock": "^10.0.6",
+    "sinon": "^7.3.1"
+  }
+}

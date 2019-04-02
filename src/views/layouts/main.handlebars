@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/all.min.css"> <!-- fontawesome -->
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/custom.css"> <!-- bootstrap customizations -->
+  <title>Top 3 ToDo</title>
+</head>
+
+<body>
+  <div class="container-fluid">
+    {{> _header}}
+    {{> _msg}}
+    {{> _errors}}
+    <h2 class="text-center">{{title}}</h2>
+    <div class="container">
+      {{{body}}}
+    </div>
+    {{> _addBtn}}
+    {{> _footer}}
+  </div>
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/all.min.js"></script> <!-- fontawesome -->
+  <script src="/js/bootstrap.bundle.min.js"></script>
+  <script>
+    if($('#dueDate') && $('#taskForm')) {
+      $('#taskForm').validate(function(event) {
+        if($('#dueDate').value !== '') {
+          let dd = new Date($('#dueDate'))
+          console.log(dd)
+        }
+      })
+    }
+  </script>
+</body>
+
+</html>

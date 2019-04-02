@@ -1,0 +1,32 @@
+{{#if tasks}}
+<table class="table">
+  <thead class="thead-light">
+    <tr>
+      <th scope="col">Priority</th>
+      <th scope="col">Description</th>
+      <th scope="col">Due Date</th>
+      <th scope="col">Tags</th>
+      <th scope="col"></th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each tasks}}
+    <tr scope="row">
+      <td>{{priority}}</td>
+      <td><a href="/tasks/{{id}}">{{description}}</a></td>
+      <td>{{formatDate dueDate 'M-DD-YYYY h:mm A'}}</td>
+      <td>{{tagList}}</td>
+      <td>
+        <div class="d-inline-flex text-primary align-middle">
+          <a href="/tasks/edit/{{id}}"><i class="fas fa-edit"></i></a>
+          <form action="/tasks/{{id}}?_method=DELETE" method="post"><button type="submit"
+              class="icon-button text-primary"><i class="fas fa-times mr-2"></i></button></form>
+        </div>
+      </td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
+{{else}}
+You have no tasks. Good on you!
+{{/if}}
