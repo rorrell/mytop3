@@ -1,2 +1,3 @@
 # mytop3
-My take on a to do list
+
+To do list focusing on the next 3 items you need to do
