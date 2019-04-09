@@ -2,6 +2,7 @@
 <table class="table">
   <thead class="thead-light">
     <tr>
+      <th scope="col"></th>
       <th scope="col">Priority</th>
       <th scope="col">Description</th>
       <th scope="col">Due Date</th>
@@ -12,6 +13,9 @@
   <tbody>
     {{#each tasks}}
     <tr scope="row">
+      <td><form action="/tasks/complete/{{id}}?_method=PUT" method="post">
+        <input type="checkbox" name="isComplete{{id}}" {{#if isComplete}}checked{{/if}}>
+      </form></td>
       <td>{{priority}}</td>
       <td><a href="/tasks/{{id}}">{{description}}</a></td>
       <td>{{formatDate dueDate 'M-DD-YYYY h:mm A'}}</td>
@@ -30,3 +34,11 @@
 {{else}}
 You have no tasks. Good on you!
 {{/if}}
+
+<script lang="javascript">
+  $(":checkbox").each((index, elem) => {
+    elem.addEventListener('click', () => {
+      elem.form.submit()
+    })
+  })
+</script>

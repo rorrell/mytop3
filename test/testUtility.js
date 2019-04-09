@@ -8,7 +8,7 @@ module.exports = {
   validateReturnsPromise: (result) => {
     expect(result.then).to.be.a('Function')
     expect(result.catch).to.be.a('Function')
-    Promise.resolve(result)
+    Promise.resolve(result).catch(console.log)
   },
   validateDefaultsToNow: (date) => {
     let nowMinus5 = new Date()

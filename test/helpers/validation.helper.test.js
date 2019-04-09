@@ -1,6 +1,7 @@
 const chai = require('chai')
   , componentUnderTest = require('../../src/helpers/validation.helper')
   , sinon = require('sinon')
+  , moment = require('moment')
 
 let expect = chai.expect
 
@@ -39,6 +40,15 @@ describe('validateTask method', () => {
     task.priority = 0 //zero is acceptable
     errors = componentUnderTest.validateTask(task)
     expect(errors).to.be.an('array').that.is.empty
+  })
+  it('Ensure that the due date is not in the past', () => {
+    let task = {
+      description: 'Walkashame',
+      priority: 0,
+      dueDate: moment().add(-1, 'days')
+    }
+    let errors = componentUnderTest.validateTask(task)
+    expect(errors).to.be.an('array').that.deep.includes({ text: 'Due date cannot be in the past' })
   })
 })
 

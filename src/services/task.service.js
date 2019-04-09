@@ -34,10 +34,11 @@ module.exports = {
   editTask: (taskId, reqBody) => {
     return new Promise((resolve, reject) => {
       let errors = validator.validateTask(reqBody)
+      let taskToEdit = taskFromRequestBody(reqBody)
+      taskToEdit.id = taskId
       if(errors.length > 0) {
-        resolve({errors: errors, task: null})
+        resolve({ errors: errors, task: taskToEdit })
       } else {
-        let taskToEdit = taskFromRequestBody(reqBody)
         //because we have a virtual, have to find first so we can set it manually
         Task.findById(taskId)
           .then(task => {
@@ -70,6 +71,20 @@ module.exports = {
       Task.findByIdAndDelete(id)
         .then(() => {
           resolve()
+        }).catch(reject)
+    })
+  },
+  toggleComplete: (id) => {
+    return new Promise((resolve, reject) => {
+      if (!id) { //because findById doesn't require this itself, strangely
+        reject(new Error('Expected id parameter'))
+      }
+      Task.findById(id)
+        .then((task) => {
+          task.isComplete = !task.isComplete
+          return Task.findByIdAndUpdate(task.id, task, { new: true }) //just so we can get back the updated doc
+        }).then(task => {
+          resolve(task)
         }).catch(reject)
     })
   }

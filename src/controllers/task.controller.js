@@ -74,5 +74,13 @@ module.exports = {
         req.flash('success_msg', 'Task successfully deleted')
         res.redirect('/tasks')
       }).catch(next)
+  },
+  toggleComplete: (req, res, next) => {
+    validator.checkForIdParam(req.params, next)
+    service.toggleComplete(req.params.id)
+      .then(task => {
+        req.flash('success_msg', 'Task updated')
+        res.redirect('/tasks')
+      }).catch(next)
   }
 }

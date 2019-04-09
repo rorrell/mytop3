@@ -6,18 +6,20 @@ const chai = require('chai')
   , utils = require('../testUtility')
   , sinon = require('sinon')
   , validationHelper = require('../../src/helpers/validation.helper')
+  , moment = require('moment')
 
 chai.use(chaiDatetime)
 chai.use(chaiSorted)
 let expect = chai.expect
 
-var buildTask = (description, priority, tags = null, dueDate = new Date(), date = new Date()) => {
+var buildTask = (description, priority, tags = null, dueDate = moment().add(1, 'minutes').toDate(), date = moment().toDate(), isComplete = false) => {
   return {
     description: description,
     priority: priority,
     dueDate: dueDate,
-    tags: tags ? tags : [],
-    date: date
+    tags: tags != null ? tags : [],
+    date: date,
+    isComplete: isComplete
   }
 }
 
@@ -49,9 +51,14 @@ var validateTask = (expected, actual, includeIds = true) => {
   expect(actual.dueDate).to.equalDate(expected.dueDate)
   expect(actual.dueDate.getTime()).to.equal(expected.dueDate.getTime())
   expect(actual.date).to.equalDate(expected.date)
-  expect(actual.tags.length).to.equal(expected.tags.length)
-  for (let i = 0; i < actual.tags.length; i++) {
-    validateTag(expected.tags[i], actual.tags[i], includeIds)
+  expect(actual.isComplete).to.equal(expected.isComplete)
+  if(!actual.tags) {
+    expect(!expected.tags || expected.tags.length == 0).to.be.true
+  } else {
+    expect(actual.tags.length).to.equal(expected.tags.length)
+    for (let i = 0; i < actual.tags.length; i++) {
+      validateTag(expected.tags[i], actual.tags[i], includeIds)
+    }
   }
 }
 
@@ -325,5 +332,66 @@ describe('The deleteTask method of the task service', () => {
         expect(err).not.to.be.undefined
         done()
       })
+  })
+})
+
+describe('The toggleComplete method of the task service', () => {
+  var task
+  beforeEach(done => {
+    task = new Task(buildTask('Favor', 0))
+    task.save()
+      .then((newTask) => {
+        task = newTask
+        done()
+      }).catch(done)
+  })
+  it('Returns a promise', () => {
+    utils.validateReturnsPromise(componentUnderTest.toggleComplete(task.id))
+  })
+  it('Then returns a task', (done) => {
+    componentUnderTest.toggleComplete(task.id)
+      .then(foundTask => {
+        expect(foundTask).to.be.an('object')
+        foundTask.isComplete = !foundTask.isComplete //so that it will match the original task for validation purposes
+        validateTask(task, foundTask)
+        done()
+      }).catch(done)
+  })
+  it('Fails if you don\'t pass anything', (done) => {
+    componentUnderTest.toggleComplete()
+      .then(() => {
+        done(new Error('toggleComplete should fail without arguments'))
+      }).catch(err => {
+        expect(err).not.to.be.undefined
+        done()
+      })
+  })
+  it('Fails if you pass null', (done) => {
+    componentUnderTest.toggleComplete(null)
+      .then(() => {
+        done(new Error('toggleComplete should fail when passed null'))
+      }).catch(err => {
+        expect(err).not.to.be.undefined
+        done()
+      })
+  })
+  it('Updates isComplete to positive if it was previously negative', (done) => {
+    expect(task.isComplete).to.be.false
+    componentUnderTest.toggleComplete(task.id)
+      .then(task => {
+        expect(task.isComplete).to.be.true
+        done()
+      }).catch(done)
+  })
+  it('Updates isComplete to negative if it was previously positive', (done) => {
+    expect(task.isComplete).to.be.false
+    componentUnderTest.toggleComplete(task.id)
+      .then(task => {
+        expect(task.isComplete).to.be.true
+        return componentUnderTest.toggleComplete(task.id)
+      }).then(task => {
+        expect(task.isComplete).to.be.false
+        done()
+      }).catch(done)
   })
 })

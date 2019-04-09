@@ -26,6 +26,10 @@ const TaskSchema = new Schema({
     type: Date,
     default: getEndOfDay()
   },
+  isComplete: {
+    type: Boolean,
+    default: false
+  },
   tags: [{
     name: {
       type: String,

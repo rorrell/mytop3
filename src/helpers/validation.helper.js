@@ -1,3 +1,5 @@
+const moment = require('moment')
+
 module.exports = {
   validateTask: (task) => {
     let errors = []
@@ -10,6 +12,9 @@ module.exports = {
       } else if(task.priority < 0) {
         errors.push({ text: 'Priority must be at least 0' })
       }
+    }
+    if(moment(task.dueDate).isBefore(moment())) {
+      errors.push({ text: 'Due date cannot be in the past' })
     }
     return errors
   },

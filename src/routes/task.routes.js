@@ -17,4 +17,7 @@ router.route('/:id')
   .put(controller.editPost)
   .delete(controller.delete)
 
+router.route('/complete/:id')
+  .put(controller.toggleComplete)
+
 module.exports = router

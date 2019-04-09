@@ -9,6 +9,10 @@
     "scss": "node-sass src/scss -o public/css",
     "scss:watch": "node-sass --watch src/scss -o public/css"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rorrell/mytop3.git"
+  },
   "author": "Rachel Orrell",
   "license": "MIT",
   "dependencies": {
@@ -32,7 +36,8 @@
     "chai": "^4.2.0",
     "chai-datetime": "^1.5.0",
     "chai-sorted": "^0.2.0",
-    "mocha": "^6.0.2",
+    "js-yaml": "^3.13.0",
+    "mocha": "^6.1.2",
     "mockgoose": "^8.0.1",
     "nock": "^10.0.6",
     "sinon": "^7.3.1"

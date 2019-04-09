@@ -37,6 +37,14 @@ describe('the task model', () => {
         done()
       }).catch(done)
   })
+  it('Defaults isComplete to false', (done) => {
+    new componentUnderTest({description: 'CPA'})
+      .save()
+      .then(task => {
+        expect(task.isComplete).to.be.false
+        done()
+      }).catch(done)
+  })
   it('Saves tags using the virtual tagList with date defaulting to now', (done) => {
     new componentUnderTest({description: 'Doggo', tagList: 'Missy, King, Annabelle'})
       .save()
