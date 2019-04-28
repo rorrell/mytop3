@@ -1,0 +1,62 @@
+<div class="card mt-5">
+  <div class="card-header bg-secondary text-center">
+    <h1 class="card-title text-light">
+      {{#if task.isComplete}}
+      <i class="far fa-check-square"></i>
+      {{else}}
+      <i class="far fa-square"></i>
+      {{/if}}
+      {{task.description}}
+    </h1>
+  </div>
+  <div class="container m-1">
+    <div class="row">
+      <div class="col d-flex justify-content-end">
+        <b>Priority:</b>
+      </div>
+      <div class="col">
+        {{task.priority}}
+      </div>
+    </div>
+    <div class="row">
+      <div class="col d-flex justify-content-end">
+        <b>Due:</b>
+      </div>
+      <div class="col">
+        {{formatDate task.dueDate 'M-DD-YYYY h:mm A'}}
+      </div>
+    </div>
+    <div class="row">
+      <div class="col d-flex justify-content-end">
+        <b>Difficulty:</b>
+      </div>
+      <div class="col">
+        {{task.difficulty}}
+      </div>
+    </div>
+    <div class="row">
+      <div class="col d-flex justify-content-end">
+        <b>Tags:</b>
+      </div>
+      <div class="col">
+        {{{urlifyTags task.tags}}}
+      </div>
+    </div>
+    <div class="row">
+      <div class="col d-flex justify-content-end">
+        <b>Location:</b>
+      </div>
+      <div class="col">
+        {{task.location}}
+      </div>
+    </div>
+    <div class="row">
+      <div class="col d-flex justify-content-end">
+        <b>Notes:</b>
+      </div>
+      <div class="col">
+        {{task.notes}}
+      </div>
+    </div>
+  </div>
+</div>

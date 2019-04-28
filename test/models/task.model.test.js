@@ -2,6 +2,7 @@ const chai = require('chai')
   componentUnderTest = require('../../src/models/Task.model')
   , utils = require('../testUtility')
   , chaiDatetime = require('chai-datetime')
+  , moment = require('moment')
 
 chai.use(chaiDatetime)
 let expect = chai.expect
@@ -19,13 +20,12 @@ describe('the task model', () => {
       })
   })
   it('Defaults dueDate to end of current day', (done) => {
-    let endOfToday = new Date()
-    endOfToday.setHours(23, 59, 59, 0)
+    let endOfToday = moment().endOf('day').toDate()
     new componentUnderTest({description: 'Text'})
       .save()
       .then(task => {
         expect(task.dueDate).to.equalDate(endOfToday)
-        expect(task.dueDate.getTime()).to.equal(endOfToday.getTime())
+        expect(task.dueDate).to.equalTime(endOfToday)
         done()
       }).catch(done)
   })
@@ -45,36 +45,27 @@ describe('the task model', () => {
         done()
       }).catch(done)
   })
-  it('Saves tags using the virtual tagList with date defaulting to now', (done) => {
-    new componentUnderTest({description: 'Doggo', tagList: 'Missy, King, Annabelle'})
+  it('Defaults difficulty to zero', (done) => {
+    new componentUnderTest({ description: 'Figure' })
       .save()
       .then(task => {
-        expect(task.tags).to.be.an('array')
-        expect(task.tags.map(t => t.name)).to.have.members(['Missy', 'King', 'Annabelle'])
-        task.tags.forEach(tag => {
-          expect(tag).to.have.property('date')
-          utils.validateDefaultsToNow(tag.date)
-          expect(tag).to.have.property('name')
-          expect(tag).to.have.property('id')
-        });
+        expect(task.difficulty).to.equal(0)
         done()
       }).catch(done)
   })
-  it('Returns the tag names using the virtual tagList', (done) => {
-    let task = {
-      description: 'Kitty',
-      tags: [
-        { name: 'Jitterbug' },
-        { name: 'Fuzzball' },
-        { name: 'Pistorius' }
-      ]
-    }
-    new componentUnderTest(task)
+  it('Defaults location to empty string', (done) => {
+    new componentUnderTest({ description: 'Figure' })
       .save()
-      .then(newTask => {
-        return componentUnderTest.findById(newTask.id)
-      }).then(foundTask => {
-        expect(foundTask.tagList).to.be.a('string').that.equals('Jitterbug, Fuzzball, Pistorius')
+      .then(task => {
+        expect(task.location).to.equal('')
+        done()
+      }).catch(done)
+  })
+  it('Defaults notes to empty string', (done) => {
+    new componentUnderTest({ description: 'Figure' })
+      .save()
+      .then(task => {
+        expect(task.notes).to.equal('')
         done()
       }).catch(done)
   })

@@ -17,29 +17,27 @@
   "license": "MIT",
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.7.2",
-    "body-parser": "^1.18.3",
+    "body-parser": "^1.19.0",
     "bootstrap": "^4.3.1",
     "connect-flash": "^0.1.1",
     "connect-mongo": "^2.0.3",
     "express": "^4.16.4",
     "express-handlebars": "^3.0.2",
-    "express-session": "^1.15.6",
-    "jquery": "^3.3.1",
+    "express-session": "^1.16.1",
+    "jquery": "^3.4.0",
     "jquery-validation": "^1.19.0",
     "method-override": "^3.0.0",
     "moment": "^2.24.0",
-    "mongoose": "^5.4.21",
-    "node-sass": "^4.11.0",
-    "popper.js": "^1.14.7"
+    "mongoose": "^5.5.4",
+    "node-sass": "^4.12.0",
+    "popper.js": "^1.15.0"
   },
   "devDependencies": {
     "chai": "^4.2.0",
     "chai-datetime": "^1.5.0",
     "chai-sorted": "^0.2.0",
-    "js-yaml": "^3.13.0",
-    "mocha": "^6.1.2",
+    "mocha": "^6.1.4",
     "mockgoose": "^8.0.1",
-    "nock": "^10.0.6",
-    "sinon": "^7.3.1"
+    "sinon": "^7.3.2"
   }
 }

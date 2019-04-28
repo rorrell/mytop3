@@ -1,12 +1,21 @@
 const Task = require('../models/Task.model')
   , validator = require('../helpers/validation.helper')
+  , moment = require('moment')
 
 function taskFromRequestBody(body) {
+  let getFromInput = (property, alternate) => {
+    if(property === '' && alternate !== '') return undefined
+    if (!alternate) return property
+    return alternate
+  }
   return {
     description: body.description,
-    priority: body.priority === '' ? undefined : body.priority,
-    dueDate: body.dueDate === '' ? undefined : body.dueDate,
-    tagList: body.tagList === '' ? undefined : body.tagList
+    priority: getFromInput(body.priority),
+    dueDate: getFromInput(body.dueDate),
+    tags: getFromInput(body.tagList, body.tagList.split(', ')),
+    difficulty: getFromInput(body.difficulty),
+    location: getFromInput(body.location, ''),
+    notes: getFromInput(body.notes, '')
   }
 }
 
@@ -39,16 +48,12 @@ module.exports = {
       if(errors.length > 0) {
         resolve({ errors: errors, task: taskToEdit })
       } else {
-        //because we have a virtual, have to find first so we can set it manually
         Task.findById(taskId)
-          .then(task => {
-            task.tagList = taskToEdit.tagList //set virtual manually
-            taskToEdit.tags = task.tags //turn it around
-            return Task.findByIdAndUpdate(taskId, taskToEdit, { new: true }) //just so we can get back the updated doc
-          })
-          .then(task => {
-            resolve({errors: [], task: task})
-          }).catch(reject)
+        .then(task => {
+          return Task.findByIdAndUpdate(taskId, taskToEdit, { new: true }) //just so we can get back the updated doc
+        }).then(task => {
+          resolve({errors: [], task: task})
+        }).catch(reject)
       }
     })
   },
@@ -86,6 +91,32 @@ module.exports = {
         }).then(task => {
           resolve(task)
         }).catch(reject)
+    })
+  },
+  findByTag: (tag) => {
+    return new Promise((resolve, reject) => {
+      if(!tag) {
+        reject(new Error('Expected tag parameter'))
+      }
+      Task.find().byTag(tag)
+        .then(tasks => {
+          resolve(tasks)
+        }).catch(reject)
+    })
+  },
+  postponeAllOverdue: () => {
+      return new Promise((resolve, reject) => {
+        Task.find().byOverdue().updateMany({ $set: { dueDate: moment().endOf('day') } })
+          .then((result) => {
+            resolve(result.nModified)
+          }).catch(reject)
+      })
+  },
+  removeAllCompleted: () => {
+    return new Promise((resolve, reject) => {
+      Task.find().byComplete(true).deleteMany({})
+        .then(() => resolve())
+        .catch(reject)
     })
   }
 }

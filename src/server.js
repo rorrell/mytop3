@@ -17,7 +17,9 @@ app.set('views', path.join(__dirname, 'views'))
 app.engine('handlebars', exphbs({
   helpers: {
     disableNavLinkIfAppropriate: hbsHelper.disableNavLinkIfAppropriate,
-    formatDate: hbsHelper.formatDate
+    formatDate: hbsHelper.formatDate,
+    urlifyTags: hbsHelper.urlifyTags,
+    arrayToDelimitedList: hbsHelper.arrayToDelimitedList
   },
   defaultLayout: 'main'
 }))

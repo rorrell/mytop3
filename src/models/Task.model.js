@@ -1,12 +1,7 @@
 const mongoose = require('mongoose')
+  , moment = require('moment')
 
 const Schema = mongoose.Schema
-
-var getEndOfDay = () => {
-  let today = new Date()
-  today.setHours(23, 59, 59, 0)
-  return today
-}
 
 // Create Schema
 const TaskSchema = new Schema({
@@ -16,7 +11,7 @@ const TaskSchema = new Schema({
   },
   priority: {
     type: Number,
-    default: 0
+    default: 100
   },
   date: {
     type: Date,
@@ -24,37 +19,41 @@ const TaskSchema = new Schema({
   },
   dueDate: {
     type: Date,
-    default: getEndOfDay()
+    default: moment().endOf('day').toDate()
   },
   isComplete: {
     type: Boolean,
     default: false
   },
-  tags: [{
-    name: {
-      type: String,
-      required: true
-    },
-    date: {
-      type: Date,
-      default: new Date()
-    }
-  }]
+  tags: [String],
+  difficulty: {
+    type: Number,
+    default: 0
+  },
+  location: {
+    type: String,
+    default: ''
+  },
+  notes: {
+    type: String,
+    default: ''
+  }
   // user: {
   //   type: Schema.Types.ObjectId,
   //   ref: 'users'
   // }
 })
 
-TaskSchema.virtual('tagList')
-  .get(function() {
-    if(!this.tags) {
-      return ''
-    }
-    return this.tags.map(tag => tag.name).join(', ')
-  })
-  .set(function(v) {
-    this.tags = v && v !== '' ? v.split(', ').map((item) => { return {name: item} }) : null
-  })
+TaskSchema.query.byTag = function(tag) {
+  return this.where({ tags: { $eq: tag } })
+}
+
+TaskSchema.query.byOverdue = function() {
+  return this.where({ isComplete: { $eq: false }, dueDate: { $lt: Date.now() } })
+}
+
+TaskSchema.query.byComplete = function(isComplete) {
+  return this.where({ isComplete: { $eq: isComplete }})
+}
 
 module.exports = mongoose.model('tasks', TaskSchema)

@@ -12,34 +12,19 @@ chai.use(chaiDatetime)
 chai.use(chaiSorted)
 let expect = chai.expect
 
-var buildTask = (description, priority, tags = null, dueDate = moment().add(1, 'minutes').toDate(), date = moment().toDate(), isComplete = false) => {
+var buildTask = (description, priority, tags = null, dueDate = moment().add(1, 'minutes').toDate(), date = moment().toDate(), isComplete = false, difficulty = 0, location = '', notes = '') => {
   return {
     description: description,
     priority: priority,
     dueDate: dueDate,
     tags: tags != null ? tags : [],
+    tagList: tags != null ? tags.join(', ') : '',
     date: date,
-    isComplete: isComplete
+    isComplete: isComplete,
+    difficulty: difficulty,
+    location: location,
+    notes: notes
   }
-}
-
-var buildTags = (tagNames) => {
-  let tags = []
-  for (const tag in tagNames) {
-    tags.push({
-      name: tagNames[tag],
-      date: Date.now()
-    })
-  }
-  return tags
-}
-
-var validateTag = (expected, actual, includeIds = true) => {
-  if(includeIds) {
-    expect(actual.id).to.equal(expected.id)
-  }
-  expect(actual.name).to.equal(expected.name)
-  expect(actual.date).to.equalDate(expected.date)
 }
 
 var validateTask = (expected, actual, includeIds = true) => {
@@ -51,20 +36,19 @@ var validateTask = (expected, actual, includeIds = true) => {
   expect(actual.dueDate).to.equalDate(expected.dueDate)
   expect(actual.dueDate.getTime()).to.equal(expected.dueDate.getTime())
   expect(actual.date).to.equalDate(expected.date)
-  expect(actual.isComplete).to.equal(expected.isComplete)
+  expect(actual.isComplete).to.equal(!expected.isComplete ? false : expected.isComplete)
+  expect(actual.difficulty).to.equal(!expected.difficulty ? 0 : expected.difficulty)
+  expect(actual.location).to.equal(!expected.location ? '' : expected.location)
+  expect(actual.notes).to.equal(!expected.notes ? '' : expected.notes)
   if(!actual.tags) {
     expect(!expected.tags || expected.tags.length == 0).to.be.true
   } else {
     expect(actual.tags.length).to.equal(expected.tags.length)
     for (let i = 0; i < actual.tags.length; i++) {
-      validateTag(expected.tags[i], actual.tags[i], includeIds)
+      expect(actual.tags[i]).to.equal(expected.tags[i])
     }
   }
 }
-
-afterEach(() => {
-  sinon.restore()
-})
 
 describe('The getAllTasks method of the task service', () => {
   it('Returns a promise', () => {
@@ -78,7 +62,7 @@ describe('The getAllTasks method of the task service', () => {
       }).catch(done)
   })
   it('Returns a populated array of tasks if tasks are present', (done) => {
-    var task = buildTask('I\'m a task', 3, buildTags(['cats']))
+    var task = buildTask('I\'m a task', 3, ['cats'])
     new Task(task).save()
       .then(savedTask => {
         componentUnderTest.getAllTasks()
@@ -86,7 +70,7 @@ describe('The getAllTasks method of the task service', () => {
             expect(tasks).to.have.a.lengthOf(1)
             validateTask(savedTask, tasks[0])
             expect(tasks[0].tags).to.have.a.lengthOf(1)
-            validateTag(savedTask.tags[0], tasks[0].tags[0])
+            expect(savedTask.tags[0]).to.equal(tasks[0].tags[0])
             done()
           }).catch(done)
       }).catch(done)
@@ -138,6 +122,9 @@ describe('The getAllTasks method of the task service', () => {
 })
 
 describe('The addTask method of the task service', () => {
+  afterEach(() => {
+    sinon.restore()
+  })
   it('Returns a promise', () => {
     utils.validateReturnsPromise(componentUnderTest.addTask(buildTask('Test', 3)))
   })
@@ -197,8 +184,12 @@ describe('The editTask method of the task service', () => {
     task.save()
       .then((newTask) => {
         task = newTask
+        task.tagList = task.tags.join(', ')
         done()
       }).catch(done)
+  })
+  afterEach(() => {
+    sinon.restore()
   })
   it('Returns a promise', () => {
     utils.validateReturnsPromise(componentUnderTest.editTask(task.id, task))
@@ -206,9 +197,10 @@ describe('The editTask method of the task service', () => {
   it('Then returns an object with errors and a modified task', (done) => {
     task.priority = 11
     componentUnderTest.editTask(task.id, task)
-      .then(result => {
+    .then(result => {
         expect(result).to.be.an('object')
         expect(result.errors).to.be.an('array').that.is.empty
+        console.log(`Actual: ${result.task}`)
         validateTask(task, result.task)
         done()
       })
@@ -391,6 +383,144 @@ describe('The toggleComplete method of the task service', () => {
         return componentUnderTest.toggleComplete(task.id)
       }).then(task => {
         expect(task.isComplete).to.be.false
+        done()
+      }).catch(done)
+  })
+})
+
+describe('The findByTag method of the task service', () => {
+  var task
+  beforeEach(done => {
+    task = new Task(buildTask('Favor', 0, ['hello', 'goodbye']))
+    task.save()
+      .then((newTask) => {
+        task = newTask
+        done()
+      }).catch(done)
+  })
+  it('Returns a promise', () => {
+    utils.validateReturnsPromise(componentUnderTest.findByTag('hello'))
+  })
+  it('Returns matching tasks', (done) => {
+    let tasks = []
+    tasks.push(new Task(buildTask('Cat', 0, ['capitalist', 'socialist'])))
+    tasks.push(new Task(buildTask('Dog', 0, ['socialist'])))
+    tasks.push(new Task(buildTask('Horse', 0)))
+    Task.create(tasks)
+      .then(tasks => {
+        return componentUnderTest.findByTag('socialist')
+      }).then(socialistTasks => {
+        expect(socialistTasks).to.be.an('array').and.have.lengthOf(2)
+        return componentUnderTest.findByTag('capitalist')
+      }).then(capitalistTasks => {
+        expect(capitalistTasks).to.be.an('array').and.have.lengthOf(1)
+        done()
+      }).catch(done)
+  })
+  it('Fails if you don\'t pass anything', (done) => {
+    componentUnderTest.findByTag()
+      .then(() => {
+        done(new Error('findByTag should fail without arguments'))
+      }).catch(err => {
+        expect(err).not.to.be.undefined
+        done()
+      })
+  })
+  it('Fails if you pass null', (done) => {
+    componentUnderTest.findByTag(null)
+      .then(() => {
+        done(new Error('findByTag should fail when passed null'))
+      }).catch(err => {
+        expect(err).not.to.be.undefined
+        done()
+      })
+  })
+})
+
+describe('The postponeAllOverdue method of the task service', () => {
+  var tasks = []
+  beforeEach(done => {
+    tasks.push(new Task(buildTask('Ornithomimus', 0, null, moment().add(-1, 'days').toDate(), null, false)))
+    tasks.push(new Task(buildTask('Galimumus', 0, null, moment().add(-3, 'days').toDate(), null, false)))
+    tasks.push(new Task(buildTask('Brontosaurus', 0, null, moment().add(1, 'days').toDate(), null, false)))
+    tasks.push(new Task(buildTask('Apatasaurus', 0, null, moment().add(-6, 'days').toDate(), null, false)))
+    tasks.push(new Task(buildTask('Parasaurolophus', 0, null, moment().add(-5, 'days').toDate(), null, true)))
+    Task.create(tasks)
+      .then((savedTasks) => {
+        done()
+      }).catch(done)
+  })
+  it('Returns a promise', () => {
+    utils.validateReturnsPromise(componentUnderTest.postponeAllOverdue())
+  })
+  it('Fails if you pass null', (done) => {
+    componentUnderTest.findByTag(null)
+      .then(() => {
+        done(new Error('findByTag should fail when passed null'))
+      }).catch(err => {
+        expect(err).not.to.be.undefined
+        done()
+      })
+  })
+  it('Updates all incomplete overdue tasks to be due at the end of the current day', (done) => {
+    let taskIds = []
+    let endOfDay = moment().endOf('day').toDate()
+    Task.find().byOverdue()
+      .then(tasks => {
+        expect(tasks).to.be.an('array').that.has.a.lengthOf(3)
+        tasks.forEach(task => {
+          expect(task.dueDate).beforeDate(endOfDay)
+          expect(task.dueDate).beforeTime(endOfDay)
+          expect(task.isComplete).to.be.false
+          taskIds.push(task.id)
+        });
+        return componentUnderTest.postponeAllOverdue()
+      }).then(nModified => {
+        expect(nModified).to.be.a('number').and.to.equal(3)
+        return Task.find().byOverdue()
+      }).then(tasks => {
+          expect(tasks).to.be.an('array').that.is.empty
+          return Task.find({ id: { $in: taskIds } })
+      }).then(tasks => {
+          tasks.forEach(task => {
+            expect(task.dueDate).equalDate(endOfDay)
+            expect(task.dueDate).equalTime(endOfDay)
+            expect(task.isComplete).to.be.false
+          });
+          done()
+      }).catch(done)
+  })
+})
+
+describe('The removeAllCompleted method of the task service', () => {
+  var tasks = []
+  beforeEach(done => {
+    tasks.push(new Task(buildTask('Riddle', 0, null, moment().add(-1, 'days').toDate(), null, true)))
+    tasks.push(new Task(buildTask('Puzzle', 0, null, moment().add(-3, 'days').toDate(), null, true)))
+    tasks.push(new Task(buildTask('Game', 0, null, moment().add(1, 'days').toDate(), null, false)))
+    Task.create(tasks)
+      .then((savedTasks) => {
+        done()
+      }).catch(done)
+  })
+  it('Returns a promise', () => {
+    utils.validateReturnsPromise(componentUnderTest.removeAllCompleted())
+  })
+  it('Deletes only completed tasks', (done) => {
+    Task.countDocuments().byComplete(true)
+      .then(completeBeforeRemoval => {
+        expect(completeBeforeRemoval).to.equal(2)
+        return Task.countDocuments().byComplete(false)
+      }).then(incompleteBeforeRemoval => {
+        expect(incompleteBeforeRemoval).to.equal(1)
+        return componentUnderTest.removeAllCompleted()
+      }).then(() => {
+        return Task.countDocuments().byComplete(true)
+      }).then(completeAfterRemoval => {
+        expect(completeAfterRemoval).to.equal(0)
+        return Task.countDocuments().byComplete(false)
+      }).then(incompleteAfterRemoval => {
+        expect(incompleteAfterRemoval).to.equal(1)
         done()
       }).catch(done)
   })

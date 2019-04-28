@@ -3,7 +3,7 @@ const service = require('../services/task.service')
 
 module.exports = {
   index: (req, res, next) => {
-    service.getAllTasks('priority')
+    service.getAllTasks([['isComplete', 1], ['dueDate', 1], ['priority', 1]])
       .then(tasks => {
         res.render('tasks/index', {
           title: 'Tasks',
@@ -62,7 +62,7 @@ module.exports = {
     service.getTaskById(req.params.id)
       .then(task => {
         res.render('tasks/show', {
-          title: task.description,
+          title: '',
           task: task
         })
       }).catch(next)
@@ -80,6 +80,32 @@ module.exports = {
     service.toggleComplete(req.params.id)
       .then(task => {
         req.flash('success_msg', 'Task updated')
+        res.redirect('/tasks')
+      }).catch(next)
+  },
+  searchTags: (req, res, next) => {
+    if(!req.params.tag) {
+      return next(new Error('No tag specified in the URL'))
+    }
+    service.findByTag(req.params.tag)
+      .then(tasks => {
+        res.render('tasks/index', {
+          title: `Tag: ${req.params.tag}`,
+          tasks: tasks
+        })
+      }).catch(next)
+  },
+  postponeOverdue: (req, res, next) => {
+    service.postponeAllOverdue()
+      .then(nModified => {
+        req.flash('success_msg', 'Overdue tasks successfully postponed')
+        res.redirect('/tasks')
+      }).catch(next)
+  },
+  removedCompleted: (req, res, next) => {
+    service.removeAllCompleted()
+      .then(() => {
+        req.flash('success_msg', 'Completed tasks successfully removed')
         res.redirect('/tasks')
       }).catch(next)
   }

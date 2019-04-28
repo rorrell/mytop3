@@ -20,4 +20,13 @@ router.route('/:id')
 router.route('/complete/:id')
   .put(controller.toggleComplete)
 
+router.route('/tags/:tag')
+  .get(controller.searchTags)
+
+router.route('/batch/postpone')
+  .post(controller.postponeOverdue)
+
+router.route('/batch/completed')
+  .delete(controller.removedCompleted)
+
 module.exports = router

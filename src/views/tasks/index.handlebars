@@ -1,4 +1,14 @@
+<script>
+</script>
 {{#if tasks}}
+<div class="d-flex justify-content-center mb-3">
+  <form action="/tasks/batch/postpone" method="post" class="mr-2">
+    <input type="submit" class="btn bg-secondary text-light" value="Postpone Overdue Tasks">
+  </form>
+  <form action="/tasks/batch/completed?_method=DELETE" method="post">
+    <input type="submit" class="btn bg-secondary text-light" value="Remove Complete Tasks">
+  </form>
+</div>
 <table class="table">
   <thead class="thead-light">
     <tr>
@@ -13,13 +23,15 @@
   <tbody>
     {{#each tasks}}
     <tr scope="row">
-      <td><form action="/tasks/complete/{{id}}?_method=PUT" method="post">
-        <input type="checkbox" name="isComplete{{id}}" {{#if isComplete}}checked{{/if}}>
-      </form></td>
+      <td>
+        <form action="/tasks/complete/{{id}}?_method=PUT" method="post">
+          <input type="checkbox" name="isComplete{{id}}" {{#if isComplete}}checked{{/if}}>
+        </form>
+      </td>
       <td>{{priority}}</td>
       <td><a href="/tasks/{{id}}">{{description}}</a></td>
       <td>{{formatDate dueDate 'M-DD-YYYY h:mm A'}}</td>
-      <td>{{tagList}}</td>
+      <td>{{{urlifyTags tags}}}</td>
       <td>
         <div class="d-inline-flex text-primary align-middle">
           <a href="/tasks/edit/{{id}}"><i class="fas fa-edit"></i></a>
