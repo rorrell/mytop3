@@ -31,5 +31,36 @@ module.exports = {
       return arr.join(', ')
     }
     return ''
+  },
+  isoDurationToForm: (dur) => {
+    let arr
+    if(!dur) {
+      arr = ['', '']
+    } else {
+      arr = moment.duration(dur).humanize().split(' ')
+      switch(arr[1]) {
+        case "days":
+        case "weeks":
+        case "months":
+        case "years":
+          break
+        default:
+          arr[1] = ''
+      }
+    }
+    return `<div class="form-row mb-4">
+      <div class="col">
+        <input type="text" name="repeatAmt" class="form-control" value="${arr[0]}">
+      </div>
+      <div class="col">
+        <select name="repeatType" class="form-control">
+          <option value=""${arr[1] === '' ? ' selected' : ''}>None</option>
+          <option value="days"${arr[1] === 'days' ? ' selected' : ''}>Days</option>
+          <option value="weeks"${arr[1] === 'weeks' ? ' selected' : ''}>Weeks</option>
+          <option value="months"${arr[1] === 'months' ? ' selected' : ''}>Months</option>
+          <option value="years"${arr[1] === 'years' ? ' selected' : ''}>Years</option>
+        </select>
+      </div>
+    </div>`
   }
 }

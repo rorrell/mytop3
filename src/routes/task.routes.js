@@ -29,4 +29,7 @@ router.route('/batch/postpone')
 router.route('/batch/completed')
   .delete(controller.removedCompleted)
 
+router.route('/batch/pick')
+  .get(controller.pick)
+
 module.exports = router

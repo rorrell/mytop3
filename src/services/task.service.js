@@ -15,8 +15,24 @@ function taskFromRequestBody(body) {
     tags: getFromInput(body.tagList, body.tagList.split(', ')),
     difficulty: getFromInput(body.difficulty),
     location: getFromInput(body.location, ''),
-    notes: getFromInput(body.notes, '')
+    notes: getFromInput(body.notes, ''),
+    repeatInterval: body.repeatType !== '' && Number(body.repeatAmt) > 0 ? moment.duration(Number(body.repeatAmt), body.repeatType).toISOString() : ''
   }
+}
+
+var addTask = (reqBody) => {
+  return new Promise((resolve, reject) => {
+    let errors = validator.validateTask(reqBody)
+    if (errors.length > 0) {
+      resolve({ errors: errors, task: null })
+    } else {
+      new Task(taskFromRequestBody(reqBody))
+        .save()
+        .then(task => {
+          resolve({ errors: [], task: task })
+        }).catch(reject)
+    }
+  })
 }
 
 module.exports = {
@@ -26,20 +42,10 @@ module.exports = {
   getAllTasks: (sort) => {
     return Task.find().sort(sort)
   },
-  addTask: (reqBody) => {
-    return new Promise((resolve, reject) => {
-      let errors = validator.validateTask(reqBody)
-      if(errors.length > 0) {
-        resolve({errors: errors, task:null})
-      } else {
-        new Task(taskFromRequestBody(reqBody))
-          .save()
-          .then(task => {
-            resolve({errors: [], task: task})
-          }).catch(reject)
-      }
-    })
+  getIncompleteTasks: (sort) => {
+    return Task.find().byComplete(false).sort(sort)
   },
+  addTask: addTask,
   editTask: (taskId, reqBody) => {
     return new Promise((resolve, reject) => {
       let errors = validator.validateTask(reqBody)
@@ -88,6 +94,15 @@ module.exports = {
         .then((task) => {
           task.isComplete = !task.isComplete
           return Task.findByIdAndUpdate(task.id, task, { new: true }) //just so we can get back the updated doc
+        }).then(task => {
+          let nextStep;
+          if (task.isComplete && task.repeatInterval) { //a repeating task that we are about to mark as complete
+            let newTask = new Task(task)
+            newTask.isComplete = false
+            newTask.dueDate = moment().add(moment.duration(newTask.repeatInterval).asMilliseconds(), 'milliseconds').toDate()
+            nextStep = newTask.save()
+          } else { resolve(task) }
+          return nextStep
         }).then(task => {
           resolve(task)
         }).catch(reject)

@@ -108,5 +108,14 @@ module.exports = {
         req.flash('success_msg', 'Completed tasks successfully removed')
         res.redirect('/tasks')
       }).catch(next)
-  }
+  },
+  pick: (req, res, next) => {
+    service.getIncompleteTasks([['dueDate', 1], ['priority', 1]])
+      .then(tasks => {
+        res.render('tasks/pick', {
+          title: 'Pick Next 3 Tasks',
+          tasks: tasks
+        })
+      }).catch(next)
+  },
 }

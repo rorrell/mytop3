@@ -1,0 +1,57 @@
+{{#if tasks}}
+<table class="table table-bordered table-hover" id="unpicked">
+  <thead class="thead-light">
+    <tr>
+      <th scope="col">Priority</th>
+      <th scope="col">Description</th>
+      <th scope="col">Due Date</th>
+      <th scope="col">Tags</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each tasks}}
+    <tr scope="row" id="{{id}}">
+      <td>{{priority}}</td>
+      <td>{{description}}</td>
+      <td>{{formatDate dueDate 'M-DD-YYYY h:mm A'}}</td>
+      <td>{{{arrayToDelimitedList tags}}}</td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
+<table class="table table-bordered table-hover invisible" id="picked">
+    <thead class="thead-light">
+      <tr>
+        <th scope="col">Priority</th>
+        <th scope="col">Description</th>
+        <th scope="col">Due Date</th>
+        <th scope="col">Tags</th>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+{{else}}
+You have no tasks. Good on you!
+{{/if}}
+<script>
+  function togglePicked(rowId) {
+    let row = $(`#${rowId}`)
+    let parent = row.parent().parent()[0].id
+    row.detach()
+    let moveTo = parent === "picked" ? "unpicked" : "picked"
+    row.appendTo(`#${moveTo}>tbody`)
+    if($("#picked>tbody").children().length > 0) {
+      $("#picked").removeClass("invisible")
+    } else if (!$("#picked").hasClass("invisible")) {
+      $("#picked").addClass("invisible")
+    }
+  }
+  $("tr").each((index, elem) => {
+    if (elem.id) {
+      elem.addEventListener('click', () => {
+        togglePicked(elem.id)
+      })
+    }
+  })
+</script>

@@ -37,6 +37,10 @@ const TaskSchema = new Schema({
   notes: {
     type: String,
     default: ''
+  },
+  repeatInterval: {
+    type: String,
+    default: ''
   }
   // user: {
   //   type: Schema.Types.ObjectId,

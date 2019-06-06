@@ -19,7 +19,8 @@ app.engine('handlebars', exphbs({
     disableNavLinkIfAppropriate: hbsHelper.disableNavLinkIfAppropriate,
     formatDate: hbsHelper.formatDate,
     urlifyTags: hbsHelper.urlifyTags,
-    arrayToDelimitedList: hbsHelper.arrayToDelimitedList
+    arrayToDelimitedList: hbsHelper.arrayToDelimitedList,
+    isoDurationToForm: hbsHelper.isoDurationToForm
   },
   defaultLayout: 'main'
 }))
