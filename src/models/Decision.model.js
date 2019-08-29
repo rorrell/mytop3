@@ -15,7 +15,11 @@ const DecisionSchema = new Schema({
       type: Schema.Types.ObjectId,
       ref: 'tasks'
     }
-  }]
+  }],
+  date: {
+    type: Date,
+    default: new Date()
+  }
 })
 
 module.exports = mongoose.model('decisions', DecisionSchema)

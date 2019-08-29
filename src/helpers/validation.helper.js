@@ -25,5 +25,23 @@ module.exports = {
   },
   varIsDefinedStringAndNotEmpty: (arg) => {
     return arg && arg !== ''
+  },
+  validateDecision: (decision) => {
+    let errors = []
+    if(Array.isArray(decision.top3s) && Array.isArray(decision.others)) {
+      let totalTasks = decision.top3s.length + decision.others.length;
+      if(totalTasks == 0) {
+        errors.push({ text: 'No tasks to save' })
+      }
+      else if (totalTasks <= 3 && decision.top3s.length < totalTasks) {
+        errors.push({ text: 'You must pick all tasks if there are no more than three in total' })
+      }
+      else if (totalTasks > 3 && (decision.top3s.length < 3 || decision.top3s.length > 3)) {
+        errors.push({ text: 'You must pick exactly three tasks' })
+      }
+    } else {
+      errors.push({ text: 'Invalid arguments (must be arrays)' })
+    }
+    return errors
   }
 } 

@@ -1,5 +1,52 @@
+{{#if decision}}
+<table class="table table-bordered table-hover" id="unpickedTbl">
+  <thead class="thead-light">
+    <tr>
+      <th scope="col">Priority</th>
+      <th scope="col">Description</th>
+      <th scope="col">Due Date</th>
+      <th scope="col">Tags</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each decision.others}}
+    <tr scope="row" id="{{id}}">
+      <td>{{priority}}</td>
+      <td>{{description}}</td>
+      <td>{{formatDate dueDate 'M-DD-YYYY h:mm A'}}</td>
+      <td>{{{arrayToDelimitedList tags}}}</td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
+<table class="table table-bordered table-hover" id="pickedTbl">
+  <thead class="thead-light">
+    <tr>
+      <th scope="col">Priority</th>
+      <th scope="col">Description</th>
+      <th scope="col">Due Date</th>
+      <th scope="col">Tags</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each decision.pick3s}}
+    <tr scope="row" id="{{id}}">
+      <td>{{priority}}</td>
+      <td>{{description}}</td>
+      <td>{{formatDate dueDate 'M-DD-YYYY h:mm A'}}</td>
+      <td>{{{arrayToDelimitedList tags}}}</td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
+<form action="/decisions" method="post" id="form1">
+  <input type="hidden" name="top3s" id="top3s">
+  <input type="hidden" name="others" id="others">
+  <button class="btn btn-secondary btn-block" type="submit">Submit</button>
+</form>
+{{/if}}
 {{#if tasks}}
-<table class="table table-bordered table-hover" id="unpicked">
+<table class="table table-bordered table-hover" id="unpickedTbl">
   <thead class="thead-light">
     <tr>
       <th scope="col">Priority</th>
@@ -19,7 +66,7 @@
     {{/each}}
   </tbody>
 </table>
-<table class="table table-bordered table-hover invisible" id="picked">
+<table class="table table-bordered table-hover invisible" id="pickedTbl">
     <thead class="thead-light">
       <tr>
         <th scope="col">Priority</th>
@@ -31,6 +78,11 @@
     <tbody>
     </tbody>
 </table>
+<form action="/decisions" method="post" id="form2">
+  <input type="hidden" name="top3s" id="top3s">
+  <input type="hidden" name="others" id="others">
+  <button class="btn btn-secondary btn-block" type="submit">Submit</button>
+</form>
 {{else}}
 You have no tasks. Good on you!
 {{/if}}
@@ -39,16 +91,35 @@ You have no tasks. Good on you!
     let row = $(`#${rowId}`)
     let parent = row.parent().parent()[0].id
     row.detach()
-    let moveTo = parent === "picked" ? "unpicked" : "picked"
+    let isPicked = parent === "pickedTbl"
+    let moveTo = isPicked ? "unpickedTbl" : "pickedTbl"
     row.appendTo(`#${moveTo}>tbody`)
-    if($("#picked>tbody").children().length > 0) {
-      $("#picked").removeClass("invisible")
-    } else if (!$("#picked").hasClass("invisible")) {
-      $("#picked").addClass("invisible")
+    if(isPicked) {
+      let pickedText = $("#top3s").val()
+      let unpickedText = $("#others").val()
+      $("#top3s").val(pickedText.replace("|" + rowId, ''))
+      $("#others").val(unpickedText + "|" + rowId)
+    } else {
+      let pickedText = $("#top3s").val()
+      let unpickedText = $("#others").val()
+      $("#others").val(pickedText.replace("|" + rowId, ''))
+      $("#top3s").val(unpickedText + "|" + rowId)
+    }
+    if($("#pickedTbl>tbody").children().length > 0) {
+      $("#pickedTbl").removeClass("invisible")
+    } else if (!$("#pickedTbl").hasClass("invisible")) {
+      $("#pickedTbl").addClass("invisible")
     }
   }
   $("tr").each((index, elem) => {
     if (elem.id) {
+      if($(`#${elem.id}`).parent().parent()[0].id === "pickedTbl") {
+        let pickedText = $("#top3s").val()
+        $("#top3s").val(pickedText + "|" + elem.id)
+      } else {
+        let unpickedText = $("#others").val()
+        $("#others").val(unpickedText + "|" + elem.id)
+      }
       elem.addEventListener('click', () => {
         togglePicked(elem.id)
       })

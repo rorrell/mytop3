@@ -117,5 +117,5 @@ module.exports = {
           tasks: tasks
         })
       }).catch(next)
-  },
+  }
 }

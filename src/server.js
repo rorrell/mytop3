@@ -69,6 +69,8 @@ var setup = function() {
     app.use('/', indexRoutes)
     var taskRoutes = require('./routes/task.routes')
     app.use('/tasks', taskRoutes)
+    var decisionRoutes = require('./routes/decision.routes')
+    app.use('/decisions', decisionRoutes)
 
     // Error handling
     app.use(expressHelper.errorHandler)
